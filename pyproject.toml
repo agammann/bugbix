@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bugbix"
+version = "0.4.0a1"
+description = "Check whether a regression test catches the bug before your fix."
+requires-python = ">=3.11"
+readme = "README.md"
+authors = [{name = "agammann"}]
+license = {text = "MIT"}
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/agammann/bugbix"
+Repository = "https://github.com/agammann/bugbix"
+Issues = "https://github.com/agammann/bugbix/issues"
+
+[project.scripts]
+bugbix = "bugbix.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["bugbix*"]

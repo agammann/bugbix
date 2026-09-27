@@ -1,0 +1,25 @@
+test_broken_fix_is_rejected (test_product.ProductTests.test_broken_fix_is_rejected) ... ok
+test_error_summary_strips_terminal_codes (test_product.ProductTests.test_error_summary_strips_terminal_codes) ... ok
+test_identical_captured_inputs_cannot_prove_a_regression (test_product.ProductTests.test_identical_captured_inputs_cannot_prove_a_regression) ... ok
+test_import_failure_is_not_a_regression (test_product.ProductTests.test_import_failure_is_not_a_regression) ... ok
+test_input_mutation_is_inconclusive (test_product.ProductTests.test_input_mutation_is_inconclusive) ... ok
+test_installed_style_cli_json_and_exit_codes (test_product.ProductTests.test_installed_style_cli_json_and_exit_codes) ... ok
+test_one_error_explains_inconclusive_mixed_suite (test_product.ProductTests.test_one_error_explains_inconclusive_mixed_suite) ... ok
+test_output_inside_repository_is_rejected (test_product.ProductTests.test_output_inside_repository_is_rejected) ... ok
+test_pytest_collection_error_names_missing_module (test_product.ProductTests.test_pytest_collection_error_names_missing_module) ... ok
+test_pytest_function_catches_dirty_tree_fix (test_product.ProductTests.test_pytest_function_catches_dirty_tree_fix) ... ok
+test_pytest_runtime_error_is_inconclusive (test_product.ProductTests.test_pytest_runtime_error_is_inconclusive) ... ok
+test_real_regression_and_repository_preserved (test_product.ProductTests.test_real_regression_and_repository_preserved) ... ok
+test_repetition_disagreement_is_unstable (test_product.ProductTests.test_repetition_disagreement_is_unstable) ... ok
+test_skips_are_inconclusive (test_product.ProductTests.test_skips_are_inconclusive) ... ok
+test_snapshot_does_not_honor_export_ignore (test_product.ProductTests.test_snapshot_does_not_honor_export_ignore) ... ok
+test_subtest_failures_are_recorded (test_product.ProductTests.test_subtest_failures_are_recorded) ... ok
+test_test_errors_are_inconclusive (test_product.ProductTests.test_test_errors_are_inconclusive) ... ok
+test_test_that_passes_before_fix_is_rejected (test_product.ProductTests.test_test_that_passes_before_fix_is_rejected) ... ok
+test_timeout_is_inconclusive (test_product.ProductTests.test_timeout_is_inconclusive) ... ok
+test_zero_tests_are_inconclusive (test_product.ProductTests.test_zero_tests_are_inconclusive) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 23.034s
+
+OK
