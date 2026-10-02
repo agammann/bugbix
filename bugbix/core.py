@@ -13,6 +13,8 @@ import subprocess
 import sys
 import time
 
+from . import __version__
+
 MAX_FILE = 10 * 1024 * 1024
 MAX_TOTAL = 100 * 1024 * 1024
 
@@ -310,7 +312,7 @@ def check(repo, base, head, tests, output, python=sys.executable, timeout=30.0, 
         blockers = [{"run": "all", "issue": "no_non_test_changes"}]
     else:
         blockers = blockers_for(runs) if verdict == "inconclusive" else []
-    report = {"schema_version": 2, "product": "Bugbix", "version": "0.4.0a1",
+    report = {"schema_version": 2, "product": "Bugbix", "version": __version__,
               "verdict": verdict, "reason": reason, "regression_tests": transitions,
               "blockers": blockers, "changed_files": changed_files,
               "repo": str(repo), "base": base_oid, "head": head_oid, "tests": tests,

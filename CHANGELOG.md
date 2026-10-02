@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0a2 — pytest outcome correction
+
+- Record final pytest outcomes after expected-failure processing; mixed suites containing xfail or xpass remain inconclusive.
+- Preserve ordinary assertion failures, runtime errors, and existing unittest behavior.
+- Align the package, CLI, and report version.
+
 ## 0.4.0a1 — public alpha
 
 - Compare selected unittest or pytest cases on a Git baseline and a committed or working-tree fix.

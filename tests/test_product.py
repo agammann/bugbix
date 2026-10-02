@@ -177,6 +177,35 @@ class ProductTests(unittest.TestCase):
                         self.root / "focused", repeat=1, runner="pytest")
         self.assertEqual(focused["verdict"], "regression_observed")
 
+    def test_pytest_xfail_outcomes_block_mixed_regression(self):
+        try:
+            import pytest  # noqa: F401
+        except ImportError:
+            self.skipTest("pytest is not installed in this test environment")
+        self.change_test("import pytest\nfrom pricing import total\n"
+                         "def test_discount():\n    assert total(100, 20, 10) == 88\n"
+                         "@pytest.mark.xfail(reason='pending', strict=False)\n"
+                         "def test_marked():\n    assert total(100, 20, 10) == 88\n")
+        report = self.run_check(runner="pytest")
+        self.assertEqual(report["verdict"], "inconclusive")
+        outcomes = {(item["run"], item.get("status")) for item in report["blockers"]}
+        self.assertIn(("base-1", "expected_failure"), outcomes)
+        self.assertIn(("head-1", "unexpected_success"), outcomes)
+
+    def test_pytest_xpass_does_not_count_as_an_ordinary_pass(self):
+        try:
+            import pytest  # noqa: F401
+        except ImportError:
+            self.skipTest("pytest is not installed in this test environment")
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                self.change_test("import pytest\n"
+                                 f"@pytest.mark.xfail(reason='pending', strict={strict})\n"
+                                 "def test_marked():\n    assert True\n")
+                report = check(self.repo, "HEAD", "working", ["test_pricing.py"],
+                               self.root / f"xpass-{strict}", repeat=1, runner="pytest")
+                self.assertEqual(report["verdict"], "inconclusive")
+
     def test_pytest_runtime_error_is_inconclusive(self):
         try:
             import pytest  # noqa: F401
