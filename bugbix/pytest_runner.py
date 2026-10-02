@@ -28,12 +28,9 @@ class Recorder:
         if report.failed:
             self.collection_errors.append(report.nodeid)
 
-    def pytest_runtest_makereport(self, item, call):
-        # This hook sees the original exception, allowing an assertion failure
-        # to be distinguished from a setup/runtime error.
-        import pytest
-
-        report = pytest.TestReport.from_item_and_call(item, call)
+    def record_report(self, report, call):
+        # Inspect the final report after pytest has applied xfail and other hooks,
+        # while retaining the original exception for assertion/error distinction.
         if report.failed:
             if hasattr(report, "wasxfail"):
                 status = "unexpected_success"
@@ -46,8 +43,8 @@ class Recorder:
         elif report.skipped:
             self.record(report.nodeid, "expected_failure" if hasattr(report, "wasxfail") else "skip")
         elif call.when == "call":
-            self.record(report.nodeid, "pass")
-        return report
+            self.record(report.nodeid,
+                        "unexpected_success" if hasattr(report, "wasxfail") else "pass")
 
 
 def main():
@@ -58,7 +55,13 @@ def main():
     try:
         import pytest
 
-        recorder = Recorder()
+        class Plugin(Recorder):
+            @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+            def pytest_runtest_makereport(self, item, call):
+                outcome = yield
+                self.record_report(outcome.get_result(), call)
+
+        recorder = Plugin()
         exit_code = int(pytest.main(["-q", "-p", "no:cacheprovider", *paths], plugins=[recorder]))
         payload = {"events": [{"id": nodeid, "status": status,
                                **({"error_type": recorder.error_types[nodeid]}

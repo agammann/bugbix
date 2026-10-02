@@ -5,7 +5,29 @@ known pre-fix Git commit from a fix. This record separates local observations
 from broader product claims. The project does not yet have independent user
 adoption evidence.
 
-## Local product checks
+## 0.4.0a2 checks — 2026-10-02
+
+Windows 11, CPython 3.12.14, pytest 9.1.1:
+
+- All 22 product tests passed without skips, including mixed ordinary/expected
+  failures and strict/non-strict unexpected passes.
+- Before the fix, a mixed pytest suite incorrectly returned `regression_observed`
+  and recorded an xfail-to-xpass case as an ordinary failure-to-pass transition.
+  The corrected runner reads pytest's final report and returns `inconclusive`.
+- A wheel was installed in a separate virtual environment and run outside the
+  source checkout. Its six Python module files matched the source. The package,
+  CLI, and report version agreed on `0.4.0a2`.
+- The installed CLI passed five disposable example checks: a real assertion
+  transition, a weak test, an import error, a skipped test, and a timeout.
+- The installed CLI checked Bugbix's new mixed-xfail regression test against
+  baseline `3176427c3744009772c5be2bc1a276b8464c3fa7`: two assertion failures
+  before the fix, two passes after it, yielding `regression_observed`.
+
+These are local controlled checks. The earlier third-party repository trials
+below were not rerun for this correction. Arbitrary pytest plugins and detached
+background processes remain outside the verified scope.
+
+## Earlier alpha checks — 2026-09-27
 
 Test host: Windows 11 build 26200, CPython 3.12.14, 2026-09-27. The source
 suite exercises positive and negative verdicts, pytest and unittest, skipped
@@ -15,7 +37,7 @@ in a separate virtual environment and invoked outside the source tree.
 
 | Check | Observed result |
 | --- | --- |
-| [Source suite on the alpha source](evidence/alpha-source-tests.txt) | 20 tests passed |
+| [Source suite on the first alpha source](evidence/alpha-source-tests.txt) | 20 tests passed |
 | Installed wheel smoke check | `bugbix --version` returned `Bugbix 0.4.0a1` |
 | Package consistency | Wheel Python source bytes matched the files in this repository |
 
@@ -55,7 +77,7 @@ python -m pip wheel --no-deps --wheel-dir dist .
 ```
 
 The GitHub Actions workflow runs the suite on Windows and Ubuntu with Python
-3.12. A passing workflow is separate evidence from the local results above;
+3.11 and 3.12. A passing workflow is separate evidence from the local results above;
 check the latest run before assuming either platform passed remotely.
 
 ## Boundaries

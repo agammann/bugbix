@@ -9,7 +9,7 @@ It runs the same selected Python tests against a Git baseline and your current
 code, including uncommitted edits and new, non-ignored files. It records individual
 test outcomes, source hashes, snapshots, and raw logs.
 
-Version 0.4.0a1 is a public alpha for Python projects with a known pre-fix Git
+Version 0.4.0a2 is a public alpha for Python projects with a known pre-fix Git
 commit. It has no runtime package dependencies, account, or model API. It has
 been tested locally on Windows with Python 3.12; see [VERIFICATION.md](VERIFICATION.md)
 for the exact results and current limits.
@@ -19,12 +19,12 @@ for the exact results and current limits.
 Requires Python 3.11+ and Git. Install the alpha from its tagged source:
 
 ```sh
-python -m pip install "git+https://github.com/agammann/bugbix.git@v0.4.0-alpha.1"
+python -m pip install "git+https://github.com/agammann/bugbix.git@v0.4.0-alpha.2"
 bugbix --version
 ```
 
-Alternatively, download the wheel from the [alpha release](https://github.com/agammann/bugbix/releases/tag/v0.4.0-alpha.1)
-and install that file with `python -m pip install /path/to/bugbix-0.4.0a1-py3-none-any.whl`.
+Alternatively, download the wheel from the [alpha release](https://github.com/agammann/bugbix/releases/tag/v0.4.0-alpha.2)
+and install that file with `python -m pip install /path/to/bugbix-0.4.0a2-py3-none-any.whl`.
 Bugbix is not published to PyPI.
 
 ## Quick start
@@ -91,9 +91,10 @@ Exit `0` means `regression_observed`; exit `1` means another completed verdict;
 exit `2` means configuration, snapshot, or orchestration failure. CLI output is JSON.
 For `inconclusive`, the CLI and report name the blocking run, test, and exception
 type when available. Runner failures include a short cause; the full trace remains
-in the evidence folder. An assertion failure in one test does not override an error
-or skip in another selected test. Select the relevant test and rerun, or repair
-the test error. The report lists Git-visible changed files and links both stdout
+in the evidence folder. An assertion failure in one test does not override an error,
+skip, expected failure (`xfail`), or unexpected pass (`xpass`) in another selected
+test. Remove an obsolete expected-failure marker when checking a fixed test. Select the relevant test and rerun, or
+repair the test error. The report lists Git-visible changed files and links both stdout
 and stderr. A failure-to-pass transition cannot be reported as a regression when
 the only Git-visible changes are test files. Test-file recognition uses common
 Python names and `test/` or `tests/` folders; review the changed-file list.

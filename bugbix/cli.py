@@ -3,12 +3,13 @@ import json
 import subprocess
 import sys
 
+from . import __version__
 from .core import check
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Does your regression test catch the old bug?")
-    parser.add_argument("--version", action="version", version="Bugbix 0.4.0a1")
+    parser.add_argument("--version", action="version", version=f"Bugbix {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
     run = commands.add_parser("check", help="Compare selected tests on old and current code")
     run.add_argument("--repo", default=".")
