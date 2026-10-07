@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0
+
+2026-10-06
+
+- Establish the v1 CLI, verdict/exit and report schema 2 stability contract for selected Python regression checks.
+- Retain the verified unittest/pytest engine, final xfail/xpass handling and original-checkout preservation behavior.
+- Deliver a prebuilt wheel and installable source archive with MIT licensing and SHA256 checksums.
+- Verify both actual artifacts in fresh environments, including positive/negative verdicts, recovery and checkout preservation.
+- Gate main-branch release publication on the existing Windows/Linux and Python 3.11/3.12 checks and complete artifact verification.
+
 ## 0.4.0a2 — pytest outcome correction
 
 - Record final pytest outcomes after expected-failure processing; mixed suites containing xfail or xpass remain inconclusive.

@@ -5,25 +5,61 @@ permissions:
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+concurrency:
+  group: bugbix-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
     name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest]
         python-version: ['3.11', '3.12']
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependency
-        run: python -m pip install pytest
+        run: python -m pip install pytest==9.1.1 build==1.6.1
       - name: Run product tests
         run: python -m unittest discover -s tests -v
-      - name: Build wheel
-        run: python -m pip wheel --no-deps --wheel-dir dist .
+      - name: Build and verify wheel and source archive
+        run: python scripts/package.py
+      - name: Install actual artifacts and verify consumer/recovery
+        run: python scripts/consumer.py --out ../bugbix-clean-consumer
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        with:
+          name: bugbix-packages
+          path: artifacts/
+          if-no-files-found: error
+          overwrite: true
+  publish:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const publish = require('./scripts/release.cjs');
+            await publish({ github, context, core });

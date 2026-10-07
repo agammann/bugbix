@@ -9,23 +9,29 @@ It runs the same selected Python tests against a Git baseline and your current
 code, including uncommitted edits and new, non-ignored files. It records individual
 test outcomes, source hashes, snapshots, and raw logs.
 
-Version 0.4.0a2 is a public alpha for Python projects with a known pre-fix Git
-commit. It has no runtime package dependencies, account, or model API. It has
+Version 1.0.0 supports selected Python tests against a known pre-fix Git
+commit, with a documented [v1 CLI and report contract](docs/stability.md). It has no runtime package dependencies, account, or model API. It has
 been tested locally on Windows with Python 3.12; see [VERIFICATION.md](VERIFICATION.md)
 for the exact results and current limits.
 
 ## Install
 
-Requires Python 3.11+ and Git. Install the alpha from its tagged source:
+Requires Python 3.11+ and Git. Download the wheel and `SHA256SUMS` from the [v1.0.0 release](https://github.com/agammann/bugbix/releases/tag/v1.0.0). Check the wheel's SHA256 before installing it. On PowerShell, use `Get-FileHash <wheel> -Algorithm SHA256`; on Linux, use `sha256sum -c SHA256SUMS` after downloading both artifacts listed in the manifest.
 
 ```sh
-python -m pip install "git+https://github.com/agammann/bugbix.git@v0.4.0-alpha.2"
+python -m pip install /path/to/bugbix-1.0.0-py3-none-any.whl
 bugbix --version
 ```
 
-Alternatively, download the wheel from the [alpha release](https://github.com/agammann/bugbix/releases/tag/v0.4.0-alpha.2)
-and install that file with `python -m pip install /path/to/bugbix-0.4.0a2-py3-none-any.whl`.
-Bugbix is not published to PyPI.
+Expect `Bugbix 1.0.0`. The wheel is prebuilt and has no runtime package dependencies. Bugbix is not published to PyPI.
+
+For a source installation, download `bugbix-1.0.0.tar.gz` from the same release, verify its checksum, and run:
+
+```sh
+python -m pip install /path/to/bugbix-1.0.0.tar.gz
+```
+
+Pip builds the source package using its declared setuptools backend; obtaining build dependencies may need network access. The resulting runtime remains dependency-free. Keep wheels/source archives from one version together and check the installed CLI version after upgrading. Source and distributions are [MIT licensed](LICENSE), copyright 2026 agammann.
 
 ## Quick start
 
@@ -88,7 +94,7 @@ repository root and its `src/` directory first.
 | `unstable` | Repeated runs produced different outcomes. |
 
 Exit `0` means `regression_observed`; exit `1` means another completed verdict;
-exit `2` means configuration, snapshot, or orchestration failure. CLI output is JSON.
+exit `2` means configuration, snapshot, or orchestration failure. Parsed check output is JSON; command syntax errors print argparse diagnostics to stderr with exit 2.
 For `inconclusive`, the CLI and report name the blocking run, test, and exception
 type when available. Runner failures include a short cause; the full trace remains
 in the evidence folder. An assertion failure in one test does not override an error,
@@ -101,7 +107,7 @@ Python names and `test/` or `tests/` folders; review the changed-file list.
 
 Each evidence folder contains `report.md`, `report.json`, and per-run snapshots,
 stdout, stderr, and structured test results. Default: two runs per version, a
-30-second timeout per run. Configure `--repeat` (1–10) and `--timeout` (up to 3600).
+30-second timeout per run. Configure `--repeat` (1â€“10) and `--timeout` (up to 3600).
 
 ## How it works
 
@@ -117,7 +123,7 @@ must already work on the baseline. A missing helper produces `inconclusive`.
 
 ## Scope and limits
 
-- This alpha supports selected Python test files or individual cases with unittest or pytest.
+- Version 1 supports selected Python test files or individual cases with unittest or pytest.
   Other languages and runners are not supported. Package-relative test imports
   and project-specific pytest plugins may require additional setup.
 - `--base` must be a real pre-fix commit. If `HEAD` already contains some or all
@@ -147,10 +153,12 @@ must already work on the baseline. A missing helper produces `inconclusive`.
 ## Run the product tests
 
 ```sh
-python -m pip install pytest
+python -m pip install pytest==9.1.1 build==1.6.1
 python -m unittest discover -s tests -v
 ```
 
 See [VERIFICATION.md](VERIFICATION.md) for observed results, [DIRECTION.md](DIRECTION.md)
 for the product scope and alternatives, [CHANGELOG.md](CHANGELOG.md) for release
 changes, and [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and contributions.
+
+For interrupted or inconclusive checks, upgrades and removal, see [Recovery](docs/recovery.md). The [v1 stability contract](docs/stability.md) records the supported CLI, exit codes and report schema 2.
