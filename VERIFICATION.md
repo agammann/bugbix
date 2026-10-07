@@ -1,9 +1,34 @@
 # Verification
 
-The alpha's supported claim is narrow: selected Python tests can distinguish a
+The supported claim is narrow: selected Python tests can distinguish a
 known pre-fix Git commit from a fix. This record separates local observations
 from broader product claims. The project does not yet have independent user
 adoption evidence.
+
+## 1.0.0 release checks — 2026-10-06
+
+Windows, CPython 3.12.14, pytest 9.1.1, build 1.6.1 and setuptools 84.0.0:
+
+- All 22 product tests passed without skips. The regression-check engine is
+  unchanged from the current 0.4.0a2 source; the runtime version is now 1.0.0.
+- The wheel and source archive were built and checked for matching version,
+  six runtime modules, MIT license, entry point and zero runtime dependencies.
+  The source archive also includes the CLI/report contract and recovery guide.
+- Each actual distribution was installed in its own fresh virtual environment
+  outside the source checkout. The installed CLI reported 1.0.0, imported from
+  that environment and matched all six runtime module bytes.
+- Each installed distribution passed nine controlled consumer cases: a real
+  assertion transition, a weak test, a broken fix, an import error, refusal to
+  overwrite existing evidence, recovery into a new output folder, a skipped
+  test, a timeout and a command syntax error. Help also exited successfully.
+  The checks preserved the original fixture checkout, branch, index and files;
+  refusal to reuse an output directory preserved the existing evidence bytes.
+
+These are current local checks. The workflow requires the source suite, package
+checks and both clean distribution consumers on Windows and Ubuntu with Python
+3.11 and 3.12 before main can publish the five release assets. Check the actual
+workflow and release before assuming remote success or availability. The dated
+alpha and third-party records below are historical and were not rerun for v1.
 
 ## 0.4.0a2 checks — 2026-10-02
 
@@ -71,9 +96,10 @@ error as a successful regression check.
 ## Reproduce the product suite
 
 ```sh
-python -m pip install pytest
+python -m pip install pytest==9.1.1 build==1.6.1
 python -m unittest discover -s tests -v
-python -m pip wheel --no-deps --wheel-dir dist .
+python scripts/package.py
+python scripts/consumer.py --out ../bugbix-clean-consumer
 ```
 
 The GitHub Actions workflow runs the suite on Windows and Ubuntu with Python
@@ -86,5 +112,5 @@ Only Windows and Python 3.12 have been verified locally. The third-party runs
 were focused tests, not complete upstream test suites. The two successful
 projects demonstrate technical utility, not demand. Generated files, external
 services, untracked prior baselines, and other languages remain outside this
-alpha's verified scope. Test code runs with the caller's permissions; the
+verified scope. Test code runs with the caller's permissions; the
 snapshot directories are not a security sandbox.

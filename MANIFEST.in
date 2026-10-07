@@ -1,0 +1,6 @@
+include LICENSE README.md CHANGELOG.md CONTRIBUTING.md VERIFICATION.md DIRECTION.md NAMING.md
+include evidence/alpha-source-tests.txt
+recursive-include bugbix *.py
+recursive-include tests *.py
+recursive-include docs *.md
+recursive-include scripts *.py *.cjs
