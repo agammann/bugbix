@@ -35,15 +35,86 @@ jobs:
         run: python scripts/package.py
       - name: Install actual artifacts and verify consumer/recovery
         run: python scripts/consumer.py --out ../bugbix-clean-consumer
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         with:
           name: bugbix-packages
           path: artifacts/
           if-no-files-found: error
           overwrite: true
-  publish:
+  artifact-transfer:
     needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Download package artifact (first attempt)
+        id: download1
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - name: Wait before second attempt
+        if: steps.download1.outcome == 'failure'
+        run: sleep 10
+      - name: Download package artifact (second attempt)
+        id: download2
+        if: steps.download1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - name: Wait before final attempt
+        if: steps.download2.outcome == 'failure'
+        run: sleep 20
+      - name: Download package artifact (final attempt)
+        if: steps.download2.outcome == 'failure'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - name: Verify downloaded distributions
+        working-directory: release-artifacts
+        run: |
+          sha256sum -c SHA256SUMS
+          python -m zipfile -t bugbix-*-py3-none-any.whl
+          tar -tzf bugbix-*.tar.gz > /dev/null
+      - name: Reject a corrupted package
+        run: |
+          cp -a release-artifacts "$RUNNER_TEMP/bugbix-corrupt-fixture"
+          shopt -s nullglob
+          wheels=("$RUNNER_TEMP"/bugbix-corrupt-fixture/bugbix-*-py3-none-any.whl)
+          test "${#wheels[@]}" -eq 1
+          printf x >> "${wheels[0]}"
+          if (cd "$RUNNER_TEMP/bugbix-corrupt-fixture" && sha256sum -c SHA256SUMS); then
+            echo 'Corrupted package unexpectedly passed checksum verification' >&2
+            exit 1
+          fi
+      - name: Exercise release guard using in-memory clients
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const verify = require('./scripts/test-action-compat.cjs');
+            await verify();
+  artifact-missing-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe a nonexistent artifact
+        id: missing
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-nonexistent-transfer-guard
+      - name: Reject an unexpected result
+        if: always() && steps.missing.outcome != 'failure'
+        run: exit 1
+  publish:
+    needs: [test, artifact-transfer, artifact-missing-guard]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -54,11 +125,34 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - name: Download package artifact (first attempt)
+        id: download1
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: bugbix-packages
           path: release-artifacts
-      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      - name: Wait before second attempt
+        if: steps.download1.outcome == 'failure'
+        run: sleep 10
+      - name: Download package artifact (second attempt)
+        id: download2
+        if: steps.download1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - name: Wait before final attempt
+        if: steps.download2.outcome == 'failure'
+        run: sleep 20
+      - name: Download package artifact (final attempt)
+        if: steps.download2.outcome == 'failure'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bugbix-packages
+          path: release-artifacts
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const publish = require('./scripts/release.cjs');
