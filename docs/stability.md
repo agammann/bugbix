@@ -1,6 +1,6 @@
 # Bugbix v1 stability contract
 
-Version 1.0.0 supports selected Python unittest or pytest cases against a known pre-fix Git commit and a current working tree or committed fix. Python 3.11+ and Git are required. The installed runtime has no package dependencies, account, model API or network service. Pytest and the tested project's dependencies belong in the interpreter selected by `--python`; Bugbix does not install them.
+Version 1.0.1 supports selected Python unittest or pytest cases against a known pre-fix Git commit and a current working tree or committed fix. Python 3.11+ and Git are required. The installed runtime has no package dependencies, account, model API or network service. Pytest and the tested project's dependencies belong in the interpreter selected by `--python`; Bugbix does not install them.
 
 Within v1, `bugbix check` and the documented options (`--repo`, `--base`, `--head`, repeated `--test`, `--runner`, `--out`, `--python`, `--timeout`, `--repeat`) remain supported. Defaults remain working-tree head, unittest, two repetitions and 30 seconds per run. `--version` prints `Bugbix <version>` and exits 0. Help exits 0. Command syntax errors use argparse diagnostics on stderr and exit 2.
 

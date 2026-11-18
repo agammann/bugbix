@@ -7,10 +7,12 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import shutil
 import signal
 import stat
 import subprocess
 import sys
+import tempfile
 import time
 
 from . import __version__
@@ -19,9 +21,9 @@ MAX_FILE = 10 * 1024 * 1024
 MAX_TOTAL = 100 * 1024 * 1024
 
 
-def git(repo, *args, raw=False, data=None):
+def git(repo, *args, raw=False, data=None, env=None):
     p = subprocess.run(["git", "-C", str(repo), *args], input=data,
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60, env=env)
     if p.returncode:
         raise ValueError(p.stderr.decode("utf-8", "replace").strip())
     return p.stdout if raw else p.stdout.decode("utf-8").strip()
@@ -94,6 +96,19 @@ def working(repo):
         files[name] = (path.read_bytes(), "100755" if path.stat().st_mode & stat.S_IXUSR else "100644")
         validate_size(files)
     return files
+
+
+def working_diff(repo, args):
+    index = Path(git(repo, "rev-parse", "--git-path", "index"))
+    if not index.is_absolute():
+        index = repo / index
+    with tempfile.TemporaryDirectory(prefix="bugbix-index-") as folder:
+        private_index = Path(folder) / "index"
+        if index.exists():
+            shutil.copyfile(index, private_index)
+        env = os.environ.copy()
+        env["GIT_INDEX_FILE"] = str(private_index)
+        return git(repo, "-c", "core.splitIndex=false", *args, raw=True, env=env)
 
 
 def manifest(files):
@@ -302,8 +317,9 @@ def check(repo, base, head, tests, output, python=sys.executable, timeout=30.0, 
     if head != "working":
         diff_args.append(head_oid)
     diff_args.append("--")
+    diff_output = working_diff(repo, diff_args) if head == "working" else git(repo, *diff_args, raw=True)
     changed_files = sorted({safe_name(entry.decode("utf-8"))
-                            for entry in git(repo, *diff_args, raw=True).split(b"\0") if entry}
+                            for entry in diff_output.split(b"\0") if entry}
                            | (current.keys() - old.keys()))
     if verdict == "regression_observed" and not any(
             not likely_test_file(name) for name in changed_files):

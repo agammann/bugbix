@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -61,6 +62,29 @@ class ProductTests(unittest.TestCase):
         self.assertEqual(before, git(self.repo, "status", "--porcelain=v1", raw=True))
         self.assertEqual(content, (self.repo / "pricing.py").read_bytes())
         self.assertTrue((self.root / "evidence/report.md").is_file())
+
+    def test_stat_only_change_preserves_index_and_detects_real_fix(self):
+        unchanged = self.repo / "unchanged.py"
+        unchanged.write_text('LABEL = "Sparrow Library"\n', encoding="utf-8")
+        git(self.repo, "add", "unchanged.py")
+        git(self.repo, "-c", "user.name=Bugbix test", "-c", "user.email=test@example.invalid",
+            "commit", "--quiet", "-m", "Stat-only fixture")
+        git(self.repo, "config", "diff.autoRefreshIndex", "true")
+        previous = unchanged.stat()
+        os.utime(unchanged, ns=(previous.st_atime_ns, previous.st_mtime_ns - 5_000_000_000))
+        index = self.repo / ".git" / "index"
+        before_index = index.read_bytes()
+        before_files = {name: (self.repo / name).read_bytes()
+                        for name in ("pricing.py", "test_pricing.py", "unchanged.py")}
+
+        report = self.run_check()
+
+        after_index = index.read_bytes()
+        self.assertEqual(report["verdict"], "regression_observed")
+        self.assertEqual(after_index, before_index)
+        self.assertIn("pricing.py", report["changed_files"])
+        self.assertNotIn("unchanged.py", report["changed_files"])
+        self.assertEqual({name: (self.repo / name).read_bytes() for name in before_files}, before_files)
 
     def test_test_that_passes_before_fix_is_rejected(self):
         self.change_test(TEST.replace("100, 20, 10), 88", "100, 0, 0), 100"))
