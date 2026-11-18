@@ -5,6 +5,22 @@ known pre-fix Git commit from a fix. This record separates local observations
 from broader product claims. The project does not yet have independent user
 adoption evidence.
 
+## 1.0.1 index preservation checks — 2026-11-17
+
+Windows, CPython 3.12.14, Git 2.56.0.windows.4, pytest 9.1.1,
+build 1.6.1 and setuptools 84.0.0:
+
+- All 23 product tests passed, including the unittest and pytest paths over
+  synthetic pricing code in temporary Git repositories.
+- The new stat-only case first returned `regression_observed` but failed its
+  byte-identical index assertion. The corrected working-tree diff refreshes a
+  private index copy, retaining Git's normal content comparison.
+- The same test now preserves `.git/index` and working-file bytes, excludes the
+  unchanged timestamp-only file and still detects the legitimate source fix.
+  It fingerprints the index around the check without a Git status refresh.
+- A separate actual CLI run preserved the index SHA-256 and reported only the
+  changed source and selected test. These are local source checks.
+
 ## 1.0.0 release checks — 2026-10-06
 
 Windows, CPython 3.12.14, pytest 9.1.1, build 1.6.1 and setuptools 84.0.0:

@@ -9,26 +9,26 @@ It runs the same selected Python tests against a Git baseline and your current
 code, including uncommitted edits and new, non-ignored files. It records individual
 test outcomes, source hashes, snapshots, and raw logs.
 
-Version 1.0.0 supports selected Python tests against a known pre-fix Git
+Version 1.0.1 supports selected Python tests against a known pre-fix Git
 commit, with a documented [v1 CLI and report contract](docs/stability.md). It has no runtime package dependencies, account, or model API. It has
 been tested locally on Windows with Python 3.12; see [VERIFICATION.md](VERIFICATION.md)
 for the exact results and current limits.
 
 ## Install
 
-Requires Python 3.11+ and Git. Download the wheel and `SHA256SUMS` from the [v1.0.0 release](https://github.com/agammann/bugbix/releases/tag/v1.0.0). Check the wheel's SHA256 before installing it. On PowerShell, use `Get-FileHash <wheel> -Algorithm SHA256`; on Linux, use `sha256sum -c SHA256SUMS` after downloading both artifacts listed in the manifest.
+Requires Python 3.11+ and Git. Download the wheel and `SHA256SUMS` from the [v1.0.1 release](https://github.com/agammann/bugbix/releases/tag/v1.0.1). Check the wheel's SHA256 before installing it. On PowerShell, use `Get-FileHash <wheel> -Algorithm SHA256`; on Linux, use `sha256sum -c SHA256SUMS` after downloading both artifacts listed in the manifest.
 
 ```sh
-python -m pip install /path/to/bugbix-1.0.0-py3-none-any.whl
+python -m pip install /path/to/bugbix-1.0.1-py3-none-any.whl
 bugbix --version
 ```
 
-Expect `Bugbix 1.0.0`. The wheel is prebuilt and has no runtime package dependencies. Bugbix is not published to PyPI.
+Expect `Bugbix 1.0.1`. The wheel is prebuilt and has no runtime package dependencies. Bugbix is not published to PyPI.
 
-For a source installation, download `bugbix-1.0.0.tar.gz` from the same release, verify its checksum, and run:
+For a source installation, download `bugbix-1.0.1.tar.gz` from the same release, verify its checksum, and run:
 
 ```sh
-python -m pip install /path/to/bugbix-1.0.0.tar.gz
+python -m pip install /path/to/bugbix-1.0.1.tar.gz
 ```
 
 Pip builds the source package using its declared setuptools backend; obtaining build dependencies may need network access. The resulting runtime remains dependency-free. Keep wheels/source archives from one version together and check the installed CLI version after upgrading. Source and distributions are [MIT licensed](LICENSE), copyright 2026 agammann.
@@ -59,8 +59,8 @@ Windows PowerShell example:
 bugbix check --repo C:\code\project --base HEAD --test tests/test_bug.py --out C:\evidence\run-001
 ```
 
-Use a new output folder **outside** the tested repository. Test paths use `/`,
-are relative to the repository root. The default runner needs `unittest.TestCase`
+Use a new output folder **outside** the tested repository. Test paths use `/`
+and are relative to the repository root. The default runner needs `unittest.TestCase`
 tests; the pytest runner accepts pytest tests and fixtures.
 Repeat `--test` to select more files. No commit is needed for the fix or new tests.
 
@@ -107,7 +107,7 @@ Python names and `test/` or `tests/` folders; review the changed-file list.
 
 Each evidence folder contains `report.md`, `report.json`, and per-run snapshots,
 stdout, stderr, and structured test results. Default: two runs per version, a
-30-second timeout per run. Configure `--repeat` (1â€“10) and `--timeout` (up to 3600).
+30-second timeout per run. Configure `--repeat` (1-10) and `--timeout` (up to 3600).
 
 ## How it works
 
@@ -118,7 +118,8 @@ stdout, stderr, and structured test results. Default: two runs per version, a
 5. Compare matching test identities and preserve the evidence.
 
 Git branch, index, and working files are not changed by Bugbix's snapshot
-operations. Only selected test files are transplanted: shared fixtures or helpers
+operations. The working-tree diff refreshes a private index copy.
+Only selected test files are transplanted: shared fixtures or helpers
 must already work on the baseline. A missing helper produces `inconclusive`.
 
 ## Scope and limits

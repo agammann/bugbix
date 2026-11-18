@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Keep working-tree Git diff refreshes in a private index copy.
+- Verify byte-identical index preservation after a stat-only timestamp change while detecting a legitimate regression fix.
+- Clarify the README repeat range and test-path sentence, and distinguish the dated alpha decision from the released v1 scope.
+
 ## 1.0.0
 
 2026-10-06

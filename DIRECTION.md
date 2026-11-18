@@ -2,7 +2,9 @@
 
 Decision date: 2026-09-27. Status: public alpha candidate.
 
-## Current decision
+For the released scope, see the [current v1 contract](docs/stability.md).
+
+## September 2026 decision
 
 Continue a focused alpha for **post-fix review of Python changes
 when a known pre-fix Git commit exists**. Local trials on merged fixes in two
